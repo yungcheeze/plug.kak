@@ -82,6 +82,10 @@ provide-module plug %{
 
         fi
       done
+
+      # Wait the user to confirm before closing the terminal.
+      printf 'Press Enter to quit'
+      read key
     } -- %val{runtime} %val{config} %opt{plug_module_to_repository_map}
   }
 
