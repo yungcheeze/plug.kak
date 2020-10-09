@@ -12,13 +12,16 @@ Just a thin wrapper around the `require-module` command and `ModuleLoaded` hook
 Run the following in your terminal:
 
 ``` sh
-git clone https://github.com/alexherbo2/plug.kak ~/.config/kak/autoload/plug
+git clone https://github.com/alexherbo2/plug.kak ~/.config/kak/autoload/plugins/plug
 ```
 
 ## Usage
 
 ``` kak
 require-module plug
+
+# Let plug.kak manage itself.
+plug plug https://github.com/alexherbo2/plug.kak
 
 plug-core %{
   # Tools
