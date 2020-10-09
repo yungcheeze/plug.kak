@@ -78,6 +78,9 @@ provide-module plug %{
 
         module_path=$kak_config/autoload/$module
 
+        # A bit more verbose
+        echo "plug-install: $repository → $module_path"
+
         # Install
         if ! [ -d "$module_path" ]; then
           (cd; git clone "$repository" "$module_path")
