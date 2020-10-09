@@ -2,6 +2,7 @@ provide-module plug %{
   # Internal variables
   declare-option -docstring 'plug list of modules' str-list plug_modules
   declare-option -docstring 'plug list of module name and repository pairs' str-list plug_module_to_repository_map
+  declare-option -docstring 'plug install path' str plug_install_path %sh(echo ~/.local/share/kak/plug/plugins)
 
   # Hooks
   hook -group plug-kak-begin global KakBegin .* %{
@@ -57,17 +58,24 @@ provide-module plug %{
 
   define-command plug-install -docstring 'plug-install' %{
     plug-fifo sh -c %{
-      kak_runtime=$1 kak_config=$2; shift 2
+      kak_runtime=$1 kak_config=$2 kak_opt_plug_install_path=$3; shift 3
       kak_opt_plug_module_to_repository_map=$@
 
       # plug-core
       if ! [ "$kak_config/autoload/core" -ef "$kak_runtime/autoload" ]; then
+        echo "plug-install:core: $kak_runtime/autoload → $kak_config/autoload/core"
         mkdir -p "$kak_config/autoload"
         unlink "$kak_config/autoload/core"
         ln -s "$kak_runtime/autoload" "$kak_config/autoload/core"
       fi
 
       # plug
+      # Clean off the plugins from the autoload
+      kak_autoload_plugins_path=$kak_config/autoload/plugins
+      echo "plug-install:clean: $kak_autoload_plugins_path"
+      rm -Rf "$kak_autoload_plugins_path"
+      mkdir -p "$kak_autoload_plugins_path"
+
       while [ $# -ge 2 ]; do
         module=$1 repository=$2; shift 2
 
@@ -76,31 +84,36 @@ provide-module plug %{
           continue
         fi
 
-        module_path=$kak_config/autoload/$module
+        module_autoload_path=$kak_autoload_plugins_path/$module
+        module_install_path=$kak_opt_plug_install_path/$module
 
         # A bit more verbose
-        echo "plug-install: $repository → $module_path"
+        echo "plug-install:install: $repository → $module_install_path"
 
         # Install
-        if ! [ -d "$module_path" ]; then
-          (cd; git clone "$repository" "$module_path")
+        if ! [ -d "$module_install_path" ]; then
+          (cd; git clone "$repository" "$module_install_path")
 
         # Update
         else
-          (cd "$module_path"; git pull)
+          (cd "$module_install_path"; git pull)
 
         fi
+
+        # Symlink environment
+        echo "plug-install:symlink-environment: $module_install_path → $module_autoload_path"
+        ln -s "$module_install_path" "$module_autoload_path"
       done
-    } -- %val{runtime} %val{config} %opt{plug_module_to_repository_map}
+    } -- %val{runtime} %val{config} %opt{plug_install_path} %opt{plug_module_to_repository_map}
   }
 
-  define-command plug-execute -params 2.. -shell-script-candidates 'cd "${kak_config}/autoload" && ls -1' -docstring 'plug-execute <module> <command>' %{
+  define-command plug-execute -params 2.. -shell-script-candidates 'cd "${kak_config}/autoload/plugins" && ls -1' -docstring 'plug-execute <module> <command>' %{
     plug-fifo sh -c %{
       kak_config=$1 kak_module=$2; shift 2
       kak_command=$@
 
       # plug
-      cd "$kak_config/autoload/$module"
+      cd "$kak_config/autoload/plugins/$kak_module"
       "$@"
     } -- %val{config} %arg{@}
   }
