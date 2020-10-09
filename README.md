@@ -31,7 +31,9 @@ plug-core %{
 plug-autoload my-module
 
 # A local plugin, relative to your home directory.
-plug my-module projects/my-plugin.kak
+plug my-module projects/my-plugin.kak %{
+  my-plugin-enable
+}
 
 plug prelude https://github.com/alexherbo2/prelude.kak
 
@@ -71,5 +73,17 @@ Run `plug-install` and define a `plug-upgrade` command:
 define-command plug-upgrade -docstring 'plug-upgrade' %{
   plug-install
   plug-execute lsp cargo build --release
+}
+```
+
+## Tips and tricks
+
+### Disable a plugin
+
+Prefix the `plug` command with `nop`:
+
+``` kak
+nop plug my-module projects/my-plugin.kak %{
+  my-plugin-enable
 }
 ```
