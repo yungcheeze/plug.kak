@@ -49,8 +49,14 @@ provide-module plug %{
     }
   }
 
+  define-command -hidden plug-fifo -params 1.. -docstring 'plug-fifo <command>' %{
+    nop %sh(mkfifo plug.fifo)
+    edit -fifo plug.fifo '*plug*'
+    nop %sh(("$@" > plug.fifo; rm plug.fifo) < /dev/null > /dev/null 2>&1 &)
+  }
+
   define-command plug-install -docstring 'plug-install' %{
-    terminal sh -c %{
+    plug-fifo sh -c %{
       kak_runtime=$1 kak_config=$2; shift 2
       kak_opt_plug_module_to_repository_map=$@
 
@@ -82,15 +88,11 @@ provide-module plug %{
 
         fi
       done
-
-      # Wait the user to confirm before closing the terminal.
-      printf 'Press Enter to quit'
-      read key
     } -- %val{runtime} %val{config} %opt{plug_module_to_repository_map}
   }
 
   define-command plug-execute -params 2.. -shell-script-candidates 'cd "${kak_config}/autoload" && ls -1' -docstring 'plug-execute <module> <command>' %{
-    terminal sh -c %{
+    plug-fifo sh -c %{
       kak_config=$1 kak_module=$2; shift 2
       kak_command=$@
 
