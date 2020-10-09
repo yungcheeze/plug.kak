@@ -2,7 +2,7 @@ provide-module plug %{
   # Internal variables
   declare-option -docstring 'plug list of modules' str-list plug_modules
   declare-option -docstring 'plug list of module name and repository pairs' str-list plug_module_to_repository_map
-  declare-option -docstring 'plug install path' str plug_install_path %sh(echo ~/.local/share/kak/plug/plugins)
+  declare-option -docstring 'plug install path' str plug_install_path %sh(printf '%s' "${XDG_DATA_HOME:-~/.local/share}/kak/plug/plugins")
 
   # Hooks
   hook -group plug-kak-begin global KakBegin .* %{
