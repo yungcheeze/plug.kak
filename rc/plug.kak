@@ -142,4 +142,11 @@ provide-module plug %{
   }
 
   alias global plug-upgrade plug-upgrade-example
+
+  define-command plug-clean -docstring 'plug-clean' %{
+    nop %sh{
+      rm -Rf "$kak_config/autoload/plugins" "$kak_opt_plug_install_path"
+    }
+    echo -markup '{Information}All plugins removed'
+  }
 }
