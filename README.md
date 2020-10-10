@@ -45,6 +45,13 @@ require-module plug
 # Let plug.kak manage itself.
 plug plug https://github.com/alexherbo2/plug.kak
 
+# Upgrade plugins
+# Install plugins and build kak-lsp.
+define-command plug-upgrade -docstring 'plug-upgrade' %{
+  plug-install
+  plug-execute lsp cargo build --release
+}
+
 plug-core %{
   # Tools
   set-option global makecmd 'make -j 8'
@@ -92,14 +99,7 @@ plug-old state-save https://gitlab.com/Screwtapello/kakoune-state-save %{
 }
 ```
 
-Run `plug-install` and define a `plug-upgrade` command:
-
-``` kak
-define-command plug-upgrade -docstring 'plug-upgrade' %{
-  plug-install
-  plug-execute lsp cargo build --release
-}
-```
+Run `plug-install` or `plug-upgrade` you just defined.
 
 ## Tips and tricks
 
