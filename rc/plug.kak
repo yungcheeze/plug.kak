@@ -66,7 +66,7 @@ provide-module plug %{
 
   define-command -hidden plug-fifo -params 1.. -docstring 'plug-fifo <command>' %{
     nop %sh(mkfifo plug.fifo)
-    edit -fifo plug.fifo '*plug*'
+    edit -scroll -fifo plug.fifo '*plug*'
     nop %sh(("$@" > plug.fifo 2>&1; rm plug.fifo) < /dev/null > /dev/null 2>&1 &)
   }
 
