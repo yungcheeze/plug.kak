@@ -7,6 +7,28 @@ plug.kak is a plugin manager for [Kakoune].
 Just a thin wrapper around the `require-module` command and `ModuleLoaded` hook
 — with Git support — to structure your kakrc.
 
+plug.kak does not know about plugins and Git until you use a `plug-install` command.
+
+At its core plug.kak is just a translation of:
+
+``` kak
+plug my-module my-plugin.kak %{
+  my-plugin-enable
+}
+```
+
+To:
+
+``` kak
+hook global ModuleLoaded my-module %{
+  my-plugin-enable
+}
+
+hook global KakBegin .* %{
+  require-module my-module
+}
+```
+
 ## Installation
 
 Run the following in your terminal:
