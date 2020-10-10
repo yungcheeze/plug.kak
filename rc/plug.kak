@@ -123,15 +123,15 @@ provide-module plug %{
 
   define-command plug-execute -params 2.. -shell-script-candidates 'cd "${kak_config}/autoload/plugins" && ls -1' -docstring 'plug-execute <module> <command>' %{
     plug-fifo sh -c %{
-      kak_config=$1 kak_module=$2; shift 2
+      kak_opt_plug_install_path=$1 kak_module=$2; shift 2
       kak_command=$@
 
       # plug
-      module_path=$kak_config/autoload/plugins/$kak_module
+      module_path=$kak_opt_plug_install_path/$kak_module
       echo "plug-execute:change-directory: $module_path"
       cd "$module_path"
       "$@"
-    } -- %val{config} %arg{@}
+    } -- %opt{plug_install_path} %arg{@}
   }
 
   define-command plug-upgrade-example -docstring 'plug-upgrade-example' %{
