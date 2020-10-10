@@ -127,7 +127,9 @@ provide-module plug %{
       kak_command=$@
 
       # plug
-      cd "$kak_config/autoload/plugins/$kak_module"
+      module_path=$kak_config/autoload/plugins/$kak_module
+      echo "plug-execute:change-directory: $module_path"
+      cd "$module_path"
       "$@"
     } -- %val{config} %arg{@}
   }
