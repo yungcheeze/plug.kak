@@ -9,6 +9,20 @@ provide-module plug %{
     plug-require-modules
   }
 
+  # Filetype detection
+  hook -group plug-detect global BufOpenFifo '\Q*plug*' %{
+    set-option buffer filetype plug
+  }
+
+  hook -group plug-filetype global WinSetOption filetype=plug %{
+    add-highlighter window/plug ref plug
+  }
+
+  # Highlighters
+  add-highlighter shared/plug regions
+  add-highlighter shared/plug/code default-region group
+  add-highlighter shared/plug/code/message regex '(?S)^(.+?): (.+?)$' 0:keyword 1:value
+
   define-command plug -params 2..3 -docstring 'plug <module> <repository> [config]' %{
     set-option -add global plug_modules %arg{1}
     set-option -add global plug_module_to_repository_map %arg{1} %arg{2}
