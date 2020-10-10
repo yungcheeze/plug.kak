@@ -58,7 +58,7 @@ provide-module plug %{
   define-command plug-old -params 2..3 -docstring 'plug-old <module> <repository> [config]' %{
     set-option -add global plug_module_to_repository_map %arg{1} %arg{2}
     evaluate-commands %sh{
-      if [ -d "$kak_config/autoload/$1" ]; then
+      if [ -h "$kak_config/autoload/plugins/$1" ]; then
         echo 'evaluate-commands %arg{3}'
       fi
     }
