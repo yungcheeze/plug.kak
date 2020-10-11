@@ -49,6 +49,7 @@ plug plug https://github.com/alexherbo2/plug.kak
 # Install plugins and build kak-lsp.
 define-command plug-upgrade -docstring 'plug-upgrade' %{
   plug-install
+  plug-execute connect make install
   plug-execute lsp cargo build --release
 }
 
