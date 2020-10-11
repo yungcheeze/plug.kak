@@ -46,7 +46,7 @@ require-module plug
 plug plug https://github.com/alexherbo2/plug.kak
 
 # Upgrade plugins
-# Install plugins and build kak-lsp.
+# Install plugins and build them.
 define-command plug-upgrade -docstring 'plug-upgrade' %{
   plug-install
   plug-execute connect make install
