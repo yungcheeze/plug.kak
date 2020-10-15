@@ -51,6 +51,8 @@ provide-module plug %{
   define-command -hidden plug-require-module -params 1 -docstring 'plug-require-module <module>' %{
     try %{
       require-module %arg{1}
+    } catch %{
+      echo -debug "plug-require-module: No such module: %arg{1}"
     }
   }
 
