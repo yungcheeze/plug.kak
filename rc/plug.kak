@@ -23,6 +23,10 @@ provide-module plug %{
   add-highlighter shared/plug/code default-region group
   add-highlighter shared/plug/code/message regex '(?S)^(.+?): (.+?)$' 0:keyword 1:value
 
+  hook global ModuleLoaded kak %{
+    add-highlighter shared/kakrc/code/plug_commands regex (?:\s|\A)\K(plug|plug-core|plug-autoload|plug-old)(?:(?=\s)|\z) 0:keyword
+  }
+
   define-command plug -params 2..3 -docstring 'plug <module> <repository> [config]' %{
     set-option -add global plug_modules %arg{1}
     set-option -add global plug_module_to_repository_map %arg{1} %arg{2}
