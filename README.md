@@ -102,9 +102,7 @@ plug-old state-save https://gitlab.com/Screwtapello/kakoune-state-save %{
 
 Run `plug-install` or `plug-upgrade` you just defined.
 
----
-
-Enter `plug` user mode and install new plugins with the <kbd>i</kbd> command.
+Install new plugins interactively with the `plug` user mode.
 
 ## Tips and tricks
 
