@@ -106,10 +106,6 @@ Run `plug-install` or `plug-upgrade` you just defined.
 
 Enter `plug` user mode and install new plugins with the <kbd>i</kbd> command.
 
-``` kak
-alias global u enter-user-mode
-```
-
 ## Tips and tricks
 
 ### Disable a plugin
@@ -120,4 +116,16 @@ Prefix the `plug` command with `nop`:
 nop plug my-module projects/my-plugin.kak %{
   my-plugin-enable
 }
+```
+
+### Access user modes
+
+If you have `u` aliased to `enter-user-mode`, you can do:
+
+``` kak
+u plug
+```
+
+``` kak
+alias global u enter-user-mode
 ```
