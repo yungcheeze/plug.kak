@@ -24,7 +24,7 @@ provide-module plug %{
   add-highlighter shared/plug/code/message regex '(?S)^(.+?): (.+?)$' 0:keyword 1:value
 
   hook global ModuleLoaded kak %{
-    add-highlighter shared/kakrc/code/plug_commands regex (?:\s|\A)\K(plug|plug-core|plug-autoload|plug-old)(?:(?=\s)|\z) 0:keyword
+    add-highlighter shared/kakrc/code/plug-keywords regex '\b(plug-core|plug-autoload|plug-old|plug)\b' 0:keyword
   }
 
   define-command plug -params 2..3 -docstring 'plug <module> <repository> [config]' %{
