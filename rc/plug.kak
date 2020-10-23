@@ -26,7 +26,8 @@ provide-module plug %{
   # Add plug keywords to the kakrc
   # https://github.com/mawww/kakoune/blob/master/rc/filetype/kakrc.kak
   hook global ModuleLoaded kak %{
-    add-highlighter shared/kakrc/code/plug-keywords regex '\b(plug-core|plug-autoload|plug-old|plug)\b' 0:keyword
+    # Highlight all plug-based commands
+    add-highlighter shared/kakrc/code/plug-keywords regex '\b(plug(-\w+)*)\b' 0:keyword
   }
 
   define-command plug -params 2..3 -docstring 'plug <module> <repository> [config]' %{
