@@ -33,7 +33,7 @@ provide-module plug %{
   define-command plug -params 2..3 -docstring 'plug <module> <repository> [config]' %{
     set-option -add global plug_modules %arg{1}
     set-option -add global plug_module_to_repository_map %arg{1} %arg{2}
-    hook -group plug-module-loaded global ModuleLoaded %arg{1} %arg{3}
+    hook -group plug-module-loaded global User "plug-module-loaded=%arg{1}" %arg{3}
   }
 
   define-command plug-autoload -params 1..2 -docstring 'plug-autoload <module> [config]' %{
@@ -58,6 +58,7 @@ provide-module plug %{
   define-command -hidden plug-require-module -params 1 -docstring 'plug-require-module <module>' %{
     try %{
       require-module %arg{1}
+      trigger-user-hook "plug-module-loaded=%arg{1}"
     } catch %{
       echo -debug "plug-require-module: No such module: %arg{1}"
     }
