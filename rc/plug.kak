@@ -23,6 +23,8 @@ provide-module plug %{
   add-highlighter shared/plug/code default-region group
   add-highlighter shared/plug/code/message regex '(?S)^(.+?): (.+?)$' 0:keyword 1:value
 
+  # Add plug keywords to the kakrc
+  # https://github.com/mawww/kakoune/blob/master/rc/filetype/kakrc.kak
   hook global ModuleLoaded kak %{
     add-highlighter shared/kakrc/code/plug-keywords regex '\b(plug-core|plug-autoload|plug-old|plug)\b' 0:keyword
   }
