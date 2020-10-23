@@ -159,4 +159,42 @@ provide-module plug %{
     }
     echo -markup '{Information}All plugins removed'
   }
+
+  # Mappings ───────────────────────────────────────────────────────────────────
+
+  declare-user-mode plug
+
+  define-command -hidden plug-install-interactive -docstring 'plug-install-interactive' %{
+    prompt module: %{
+      # Module
+      set-register a %val{text}
+
+      prompt repository: %{
+        # Repository
+        set-register b %val{text}
+
+        # Clone the repository
+        nop %sh{
+          module=$kak_main_reg_a
+          repository=$kak_main_reg_b
+
+          module_autoload_path=$kak_autoload_plugins_path/$module
+          module_install_path=$kak_opt_plug_install_path/$module
+
+          # Install
+          git clone "$repository" "$module_install_path"
+
+          # Symlink environment
+          ln -s "$module_install_path" "$module_autoload_path"
+        }
+
+        # Edit the kakrc
+        edit "%val{config}/kakrc"
+        execute-keys ge o 'plug <c-r>a <c-r>b' <esc> <a-x>
+        write
+      }
+    }
+  }
+
+  map -docstring 'Install' global plug i ': plug-install-interactive<ret>'
 }
