@@ -190,6 +190,7 @@ provide-module plug %{
 
         # Open a documented scratch buffer
         edit! -scratch '*plug*'
+        set-option buffer filetype asciidoc
         set-register c "
 Configuration:
 
@@ -197,7 +198,7 @@ Configuration:
 plug %reg{a} %reg{b}
 ```
 
-Press Enter to copy and open your kakrc.
+Press `Enter` to copy and open your kakrc.
 "
         execute-keys -draft '"cR_y%R'
 
