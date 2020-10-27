@@ -1,8 +1,16 @@
 provide-module plug %{
   # Internal variables
+  # Modules
   declare-option -docstring 'plug list of modules' str-list plug_modules
   declare-option -docstring 'plug list of module name and repository pairs' str-list plug_module_to_repository_map
-  declare-option -docstring 'plug install path' str plug_install_path %sh(printf '%s' "${XDG_DATA_HOME:-$HOME/.local/share}/kak/plug/plugins")
+
+  # Paths
+  declare-option -hidden -docstring 'plug XDG_DATA_HOME path' str plug_xdg_data_home_path %sh(echo "${XDG_DATA_HOME:-$HOME/.local/share}")
+
+  declare-option -docstring 'plug kakrc path' str plug_kakrc_path "%val{config}/kakrc"
+  declare-option -docstring 'plug core path' str plug_core_path "%val{runtime}/autoload"
+  declare-option -docstring 'plug autoload path' str plug_autoload_path "%val{config}/autoload/plugins"
+  declare-option -docstring 'plug install path' str plug_install_path "%opt{plug_xdg_data_home_path}/kak/plug/plugins"
 
   # Hooks
   hook -group plug-kak-begin global KakBegin .* %{
@@ -42,7 +50,7 @@ provide-module plug %{
 
   define-command plug-core -params 0..1 -docstring 'plug-core [config]' %{
     evaluate-commands %sh{
-      if [ "$kak_config/autoload/core" -ef "$kak_runtime/autoload" ]; then
+      if [ "$kak_opt_plug_autoload_path/core" -ef "$kak_opt_plug_core_path" ]; then
         echo 'evaluate-commands %arg{1}'
       fi
     }
@@ -68,7 +76,7 @@ provide-module plug %{
   define-command plug-old -params 2..3 -docstring 'plug-old <module> <repository> [config]' %{
     set-option -add global plug_module_to_repository_map %arg{1} %arg{2}
     evaluate-commands %sh{
-      if [ -d "$kak_config/autoload/plugins/$1" ]; then
+      if [ -d "$kak_opt_plug_autoload_path/$1" ]; then
         echo 'evaluate-commands %arg{3}'
       fi
     }
@@ -82,43 +90,41 @@ provide-module plug %{
 
   define-command plug-install -docstring 'plug-install' %{
     plug-fifo sh -c %{
-      kak_runtime=$1 kak_config=$2 kak_opt_plug_install_path=$3; shift 3
+      kak_opt_plug_core_path=$1
+      kak_opt_plug_autoload_path=$2
+      kak_opt_plug_install_path=$3
+      shift 3
       kak_opt_plug_module_to_repository_map=$@
 
-      # plug-core
-      if ! [ "$kak_config/autoload/core" -ef "$kak_runtime/autoload" ]; then
-        echo "plug-install:core: $kak_runtime/autoload → $kak_config/autoload/core"
-        mkdir -p "$kak_config/autoload"
-        unlink "$kak_config/autoload/core"
-        ln -s "$kak_runtime/autoload" "$kak_config/autoload/core"
-      fi
+      # Clean off the autoload
+      echo "plug-install:clean: $kak_opt_plug_autoload_path"
+      rm -Rf "$kak_opt_plug_autoload_path"
+      mkdir -p "$kak_opt_plug_autoload_path"
 
-      # plug
-      # Clean off the plugins from the autoload
-      kak_autoload_plugins_path=$kak_config/autoload/plugins
-      echo "plug-install:clean: $kak_autoload_plugins_path"
-      rm -Rf "$kak_autoload_plugins_path"
-      mkdir -p "$kak_autoload_plugins_path"
+      # Core
+      echo "plug-install:core: $kak_opt_plug_core_path → $kak_opt_plug_autoload_path/core"
+      ln -s "$kak_opt_plug_core_path" "$kak_opt_plug_autoload_path/core"
 
       while [ $# -ge 2 ]; do
         module=$1 repository=$2; shift 2
 
-        # plug-autoload has no repository
+        # plug-autoload <module> has no <repository> parameter
         if [ -z "$repository" ]; then
           continue
         fi
 
-        module_autoload_path=$kak_autoload_plugins_path/$module
+        # Module variables
+        module_autoload_path=$kak_opt_plug_autoload_path/$module
         module_install_path=$kak_opt_plug_install_path/$module
 
-        # A bit more verbose
+        # Install
         echo "plug-install:install: $repository → $module_install_path"
 
-        # Install
+        # → Install
         if ! [ -d "$module_install_path" ]; then
           (cd; git clone "$repository" "$module_install_path")
 
-        # Update
+        # → Update
         else
           (cd "$module_install_path"; git pull)
 
@@ -128,20 +134,28 @@ provide-module plug %{
         echo "plug-install:symlink-environment: $module_install_path → $module_autoload_path"
         ln -s "$module_install_path" "$module_autoload_path"
       done
-    } -- %val{runtime} %val{config} %opt{plug_install_path} %opt{plug_module_to_repository_map}
+    } -- \
+      %opt{plug_core_path} \
+      %opt{plug_autoload_path} \
+      %opt{plug_install_path} \
+      %opt{plug_module_to_repository_map}
   }
 
-  define-command plug-execute -params 2.. -shell-script-candidates 'cd "${kak_config}/autoload/plugins" && ls -1' -docstring 'plug-execute <module> <command>' %{
+  define-command plug-execute -params 2.. -shell-script-candidates 'cd "$kak_opt_plug_install_path" && ls' -docstring 'plug-execute <module> <command>' %{
     plug-fifo sh -c %{
-      kak_opt_plug_install_path=$1 kak_module=$2; shift 2
+      kak_opt_plug_install_path=$1
+      kak_module=$2
+      shift 2
       kak_command=$@
 
-      # plug
+      # Execute the command in the plugin directory
       module_path=$kak_opt_plug_install_path/$kak_module
       echo "plug-execute:change-directory: $module_path"
       cd "$module_path"
       "$@"
-    } -- %opt{plug_install_path} %arg{@}
+    } -- \
+      %opt{plug_install_path} \
+      %arg{@}
   }
 
   define-command plug-upgrade-example -docstring 'plug-upgrade-example' %{
@@ -155,7 +169,7 @@ provide-module plug %{
 
   define-command plug-clean -docstring 'plug-clean' %{
     nop %sh{
-      rm -Rf "$kak_config/autoload/plugins" "$kak_opt_plug_install_path"
+      rm -Rf "$kak_opt_plug_autoload_path" "$kak_opt_plug_install_path"
     }
     echo -markup '{Information}All plugins removed'
   }
@@ -178,7 +192,8 @@ provide-module plug %{
           module=$kak_main_reg_a
           repository=$kak_main_reg_b
 
-          module_autoload_path=$kak_autoload_plugins_path/$module
+          # Module variables
+          module_autoload_path=$kak_opt_plug_autoload_path/$module
           module_install_path=$kak_opt_plug_install_path/$module
 
           # Install
@@ -210,7 +225,7 @@ Press `Enter` to copy and open your kakrc.
 
   define-command -hidden plug-edit-kakrc -params 2 -docstring 'plug-edit-kakrc <module> <repository>' %{
     # Open the kakrc
-    edit "%val{config}/kakrc"
+    edit %opt{plug_kakrc_path}
 
     # Copy the plug command to insert.
     set-register dquote "plug %arg{1} %arg{2}
