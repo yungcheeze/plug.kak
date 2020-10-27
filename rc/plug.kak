@@ -188,12 +188,32 @@ provide-module plug %{
           ln -s "$module_install_path" "$module_autoload_path"
         }
 
-        # Edit the kakrc
-        edit "%val{config}/kakrc"
-        execute-keys ge o 'plug <c-r>a <c-r>b' <esc> <a-x>
-        write
+        # Open a documented scratch buffer
+        edit! -scratch '*plug*'
+        set-register c "
+Configuration:
+
+```
+plug %reg{a} %reg{b}
+```
+
+Press Enter to copy and open your kakrc.
+"
+        execute-keys -draft '"cR_y%R'
+
+        # Mappings
+        map -docstring 'Copy and open kakrc' buffer normal <ret> ': plug-edit-kakrc %reg{a} %reg{b}<ret>'
       }
     }
+  }
+
+  define-command -hidden plug-edit-kakrc -params 2 -docstring 'plug-edit-kakrc <module> <repository>' %{
+    # Open the kakrc
+    edit "%val{config}/kakrc"
+
+    # Copy the plug command to insert.
+    set-register dquote "plug %arg{1} %arg{2}
+"
   }
 
   map -docstring 'Install' global plug i ': plug-install-interactive<ret>'
