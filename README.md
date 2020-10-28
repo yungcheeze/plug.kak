@@ -17,7 +17,7 @@ plug my-module my-plugin.kak %{
 }
 ```
 
-To:
+to:
 
 ``` kak
 hook global ModuleLoaded my-module %{
