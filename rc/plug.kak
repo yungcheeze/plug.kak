@@ -197,7 +197,7 @@ provide-module plug %{
           module_install_path=$kak_opt_plug_install_path/$module
 
           # Install
-          git clone "$repository" "$module_install_path"
+          (cd; git clone "$repository" "$module_install_path")
 
           # Symlink environment
           ln -s "$module_install_path" "$module_autoload_path"
