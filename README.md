@@ -48,7 +48,6 @@ plug plug https://github.com/alexherbo2/plug.kak %{
   # Install plugins and build them.
   define-command plug-upgrade -docstring 'plug-upgrade' %{
     plug-install
-    plug-execute connect make install
     plug-execute lsp cargo build --release
   }
 }
@@ -66,20 +65,6 @@ plug-autoload my-module
 # A local plugin, relative to your home directory.
 plug my-module projects/my-plugin.kak %{
   my-plugin-enable
-}
-
-plug prelude https://github.com/alexherbo2/prelude.kak
-
-plug connect https://github.com/alexherbo2/connect.kak %{
-  # Modules
-  require-module connect-fzf
-  require-module connect-broot
-  require-module connect-dolphin
-
-  # Environment variables
-  set-option global connect_environment %{
-    export SHELL=dash
-  }
 }
 
 # A plugin without module.
